@@ -13,8 +13,8 @@
 
     <!--javascript imports-->
     <script src="leaflet.js"></script>
-    <script src="part4-data-clean.js"></script>
-    <script src="part4-data-dirty.js"></script>
+    <script src="part3-data-clean.js"></script>
+    <script src="part3-data-dirty.js"></script>
 
     <script>
 
@@ -62,15 +62,45 @@
     if their formatting is especially wrong. But it should accommodate most points.
 
     ===================== */
-
-    var data = bikeArrayClean;
+    //var data = bikeArrayClean;
+    var data = bikeArrayDirty;
 
     /* =====================
 
     Start code to filter data
 
     ===================== */
+    //Clean data
+    /*var dataFiltered = [];
+    for (i = 0; i<data.length; i++) {
+      if (data[i][3]>=20) {
+        dataFiltered.push(data[i])
+      }
+    }
+    console.log(dataFiltered)*/
 
+    //Dirty data
+    var dataFiltered = [];
+    for (i = 0; i<data.length; i++) {
+      if (data[i].length==5) {
+        delete data[i][0]
+        data[i][0] = Number(data[i][0])
+        data[i][1] = Number(data[i][1])
+        data[i][3] = parseInt(data[i][3], 10)
+        if (data[i][3]>20) {
+          dataFiltered.push(data[i])
+        }
+      }
+      else if (data[i].length==4) {
+        data[i][0] = Number(data[i][0])
+        data[i][1] = Number(data[i][1])
+        data[i][3] = parseInt(data[i][3], 10)
+        if (data[i][3]>=20) {
+          dataFiltered.push(data[i])
+        }
+      }
+    }
+    console.log(dataFiltered)
 
 
     /* =====================
@@ -97,6 +127,10 @@
     Start code to add markers to map
 
     ===================== */
+
+    for (i = 0; i<dataFiltered.length; i++) {
+        L.marker([dataFiltered[i][1],dataFiltered[i][0]]).addTo(map).bindPopup("<b>" + dataFiltered[i][2] + ', ' + dataFiltered[i][3] + ' docks' + "</b>");
+      }
 
 
 

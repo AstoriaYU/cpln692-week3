@@ -1,4 +1,4 @@
-(function(){
+(function () {
 
   var map = L.map('map', {
     center: [39.9522, -75.1639],
@@ -30,9 +30,76 @@
   // Filter according to enrollment that is greater than this variable:
   var minEnrollment = 300;
 
+  // refactored codes of clean data
+  schools = _.each(schools, function(s) {
+    if (_.isString(s.ZIPCODE)) {
+      split = s.ZIPCODE.split(' ');
+      normalized_zip = parseInt(split[0]);
+      s.ZIPCODE = normalized_zip;
+    }
+  });
 
+  schools = _.each(schools, function(g) {
+    if (_.isNumber(g.GRADE_ORG)) {
+      g.HAS_KINDERGARTEN = g.GRADE_LEVEL < 1;
+      g.HAS_ELEMENTARY = 1 < g.GRADE_LEVEL < 6;
+      g.HAS_MIDDLE_SCHOOL = 5 < g.GRADE_LEVEL < 9;
+      g.HAS_HIGH_SCHOOL = 8 < g.GRADE_LEVEL < 13;
+    }
+    else if (!_.isNumber(g.GRADE_ORG)) {
+      g.HAS_KINDERGARTEN = g.GRADE_LEVEL.toUpperCase().indexOf('K') >= 0;
+      g.HAS_ELEMENTARY = g.GRADE_LEVEL.toUpperCase().indexOf('ELEM') >= 0;
+      g.HAS_MIDDLE_SCHOOL = g.GRADE_LEVEL.toUpperCase().indexOf('MID') >= 0;
+      g.HAS_HIGH_SCHOOL = g.GRADE_LEVEL.toUpperCase().indexOf('HIGH') >= 0;
+    }
+  });
+
+  // refactored codes of filter data
+    var filtered_data = _.filter(schools, function(f) {
+      isOpen = f.ACTIVE.toUpperCase() == 'OPEN';
+      isPublic = (f.TYPE.toUpperCase() !== 'CHARTER' ||
+                  f.TYPE.toUpperCase() !== 'PRIVATE');
+      isSchool = (f.HAS_KINDERGARTEN ||
+                  f.HAS_ELEMENTARY ||
+                  f.HAS_MIDDLE_SCHOOL ||
+                  f.HAS_HIGH_SCHOOL);
+      meetsMinimumEnrollment = f.ENROLLMENT > minEnrollment;
+      meetsZipCondition = acceptedZipcodes.indexOf(f.ZIPCODE) >= 0;
+      filter_condition = (isOpen &&
+                          isSchool &&
+                          meetsMinimumEnrollment &&
+                          !meetsZipCondition);
+                          return filter_condition;
+    });
+    var filtered_out = _.difference(schools, filtered_data);
+
+  console.log('Included:', filtered_data.length);
+  console.log('Excluded:', filtered_out.length);
+
+  // refactored codes of main loop
+  _.each(filtered_data, function(c) {
+    isOpen = c.ACTIVE.toUpperCase() == 'OPEN';
+    isPublic = (c.TYPE.toUpperCase() !== 'CHARTER' ||
+                c.TYPE.toUpperCase() !== 'PRIVATE');
+    meetsMinimumEnrollment = c.ENROLLMENT > minEnrollment;
+    if (c.HAS_HIGH_SCHOOL) {
+      color = '#0000FF';
+    }
+    else if (c.HAS_MIDDLE_SCHOOL) {
+      color = '#00FF00';
+    }
+    else {
+      color = '##FF0000';
+    }
+    pathOpts = {'radius': c.ENROLLMENT / 30,
+                    'fillColor': color};
+    L.circleMarker([c.Y, c.X], pathOpts)
+      .bindPopup(c.FACILNAME_LABEL)
+      .addTo(map);
+  });
+  
   // clean data
-  for (var i = 0; i < schools.length - 1; i++) {
+  /*for (var i = 0; i < schools.length - 1; i++) {
     // If we have '19104 - 1234', splitting and taking the first (0th) element
     // as an integer should yield a zip in the format above
     if (typeof schools[i].ZIPCODE === 'string') {
@@ -97,7 +164,7 @@
     } else if (filtered_data[i].HAS_MIDDLE_SCHOOL) {
       color = '#00FF00';
     } else {
-      color = '##FF0000';
+      color = '##FF0000'
     }
     // The style options
     var pathOpts = {'radius': filtered_data[i].ENROLLMENT / 30,
@@ -105,6 +172,6 @@
     L.circleMarker([filtered_data[i].Y, filtered_data[i].X], pathOpts)
       .bindPopup(filtered_data[i].FACILNAME_LABEL)
       .addTo(map);
-  }
+  }*/
 
 })();

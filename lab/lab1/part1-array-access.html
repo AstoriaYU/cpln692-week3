@@ -74,10 +74,19 @@
     Start code
 
     ===================== */
+    var restaurantData = [
+      [39.953761, -75.193587, 'White Dog Cafe'],
+      [39.890218, -75.177059, 'Honey Grow'],
+      [39.958091, -75.225286, 'Just Salad']
+    ]
 
-    L.marker([0, 0]).addTo(map);
-    L.marker([0, 0]).addTo(map);
-    L.marker([0, 0]).addTo(map);
+    restaurantData.push([39.958125, -75.235425, 'KFC'], [39.956784, -75.189457, 'Spring Chinese']);
+
+    for (i = 0; i<restaurantData.length; i++) {
+        L.marker([restaurantData[i][0],restaurantData[i][1]]).addTo(map).bindPopup("<b>" + restaurantData[i][2] + "</b>");
+      }
+
+
 
     /* =====================
 
